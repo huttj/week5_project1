@@ -168,7 +168,7 @@ li {
   margin-bottom: 20px;
 }
 
-#addItem {
+#addName {
   float: left;
   width: 50%;
   margin-top: 5px;
@@ -190,6 +190,7 @@ li {
 }
 
 .numItems, .totalCost {
+  text-align: center;
   width: 50%;
   display: block;
   margin-left: auto;
@@ -199,8 +200,9 @@ li {
 
 
 .btn-success,
-.btn-danger {
-	display:block;
-	width: 100%;
+.btn-danger,
+.btn-default {
+	display: inline-block;
+	width: calc(33% - 40px);
 	margin: 40px auto;
 }
