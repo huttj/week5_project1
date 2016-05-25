@@ -1,5 +1,16 @@
 $(document).ready(function () {
 
+  var getId = (function() {
+    var lastId = 1;
+
+    return function() {
+      return lastId++;
+    };
+  })();
+
+  var $list      = $('#list');
+  var $purchased = $('#purchased');
+
   var groceries = [
     { name: "Tomatoes", status: "needed", price: "3.99", quantity: 5},
     { name: "Onions", status: "needed", price: "1.85", quantity: 2},
@@ -8,17 +19,30 @@ $(document).ready(function () {
     { name: "Jalapeno", status: "complete", price: ".15", quantity: 2}
   ];
 
-  function addItem(name, price, quantity) {
-    $('<li/>')
-      .text(name + ' (' + quantity + ') @ $' + price)
-      .appendTo($('#list'));
+  function addItem(id, name, price, quantity) {
+    var $item = makeItemElement(id, name, price, quantity);
+    $list.append($item);
     $('form')[0].reset();
   }
 
-  var item;
+  function makeItemElement(id, name, price, quantity) {
+    return $('<li/>')
+      .text(name + ' (' + quantity + ') @ $' + price)
+      .attr('key', id);
+  }
+
+  var item, $item;
   for (var i = 0; i < groceries.length; i++) {
     item = groceries[i];
-    addItem(item.name, item.price, item.quantity);
+    item.id = getId();
+
+    $item = makeItemElement(item.id, item.name, item.price, item.quantity);
+
+    if (item.status === 'complete') {
+      $('#purchased').append($item);
+    } else {
+      $('#list').append($item);
+    }
   }
 
   calculateTotalImperative();
@@ -27,7 +51,9 @@ $(document).ready(function () {
   function calculateTotalImperative() {
     var total = 0;
     for (var i = 0; i < groceries.length; i++) {
-      total += (groceries[i].quantity * groceries[i].price);
+      if (groceries[i].status === 'needed') {
+        total += (groceries[i].quantity * groceries[i].price);
+      }
     }
 
     $('.totalCost').find('span').text('$' + total.toFixed(2));
@@ -35,7 +61,10 @@ $(document).ready(function () {
 
   function calculateTotalFunctional() {
     var total = groceries.reduce(function(currentTotal, item) {
-      return currentTotal + (item.quantity * item.price);
+      if (item.status === 'needed') {
+        currentTotal += (item.quantity * item.price);
+      }
+      return currentTotal;
     }, 0);
 
     $('.totalCost').find('span').text('$' + total.toFixed(2));
@@ -45,6 +74,7 @@ $(document).ready(function () {
     
     evt.preventDefault();
 
+    var id       = getId();
     var name     = $('#addName').val();
     var price    = $('#addPrice').val();
     var quantity = $('#addQuantity').val();
@@ -61,12 +91,14 @@ $(document).ready(function () {
       return alert('Please enter 1 or greater for the quantity!');
     }
 
-    addItem(name, +price, +quantity);
+    addItem(id, name, +price, +quantity);
 
     groceries.push({
+      id: id,
       name: name,
       price: price,
-      quantity: quantity
+      quantity: quantity,
+      status: 'needed'
     });
 
     calculateTotalFunctional();
@@ -76,10 +108,54 @@ $(document).ready(function () {
   $('.remove').click(removeLastItem);
   
   function removeLastItem() {
-    groceries.pop();
+    // Can't do this, since the last item might not be a 'needed' item
+    // groceries.pop();
+    for (var i = groceries.length - 1; i >= 0; i--) {
+      if (groceries[i].status === 'needed') {
+        groceries.splice(i, 1);
+        break;
+      }
+    }
+
     $('#list').children().eq(-1).remove();
     calculateTotalImperative();
   }
+
+  $list.on('dblclick', 'li', function(e) {
+    var $el = $(this);
+    $el.remove();
+    $purchased.append($el);
+
+    var id = $el.attr('key');
+    var item = groceries.find(function(item) {
+      return item.id === +id;
+    });
+
+    if (item) {
+      item.status = 'complete';
+    }
+
+    calculateTotalImperative();
+  });
+
+  $purchased.on('dblclick', 'li', function(e) {
+    var $el = $(this);
+    $el.remove();
+    $list.append($el);
+
+    var id = $el.attr('key');
+    var item = groceries.find(function(item) {
+      return item.id === +id;
+    });
+
+    if (item) {
+      item.status = 'needed';
+    }
+
+    calculateTotalFunctional();
+  });
+
+
 
 // Before we start anything, string up the css file, this javascript file, and
 // the jQuery CDN to grocery.html file.

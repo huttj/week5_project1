@@ -16,6 +16,16 @@
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
           rel='stylesheet' type='text/css'>
 
+    <style>
+        .list-title {
+            margin: 2em 0 -1em 0;
+            text-align: center;
+        }
+        #list li:hover,
+        #purchased li:hover {
+            cursor: pointer;
+        }
+    </style>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -61,9 +71,13 @@
                     <button type="reset" class="btn btn-default">Reset</button>
                 </form>
             </div>
-            <ul id="list">
 
-            </ul>
+            <h3 class="list-title">Needed</h3>
+            <ul id="list"></ul>
+
+            <h3 class="list-title">Purchased</h3>
+            <ul id="purchased"></ul>
+
             <div class="totalCost">
                 <h4>Total Cost: <span></span></h4>
             </div>
